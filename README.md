@@ -1,0 +1,2 @@
+# StoneManager
+Resilience sample project
