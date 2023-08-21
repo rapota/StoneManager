@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using StoneMessages;
 
 namespace Stonehenge.Controllers;
@@ -8,15 +9,24 @@ namespace Stonehenge.Controllers;
 public class StoneController : ControllerBase
 {
     private readonly ILogger<StoneController> _logger;
+    private readonly FailedCounter _failedCounter;
 
-    public StoneController(ILogger<StoneController> logger)
+    public StoneController(ILogger<StoneController> logger, FailedCounter failedCounter)
     {
         _logger = logger;
+        _failedCounter = failedCounter;
     }
 
     [HttpGet]
     public async Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct)
     {
+        if (_failedCounter.Counter > 0)
+        {
+            _failedCounter.Counter--;
+            _logger.LogInformation("Failed counter set to {0}", _failedCounter.Counter);
+            throw new InvalidOperationException("Stone error.");
+        }
+
         if (count >= 10)
         {
             throw new InvalidOperationException();
@@ -38,5 +48,12 @@ public class StoneController : ControllerBase
             .ToList();
 
         return stones;
+    }
+
+    [HttpPost]
+    public void SetErrors([FromQuery] int count)
+    {
+        _failedCounter.Counter = count;
+        _logger.LogInformation("Failed counter set to {0}", count);
     }
 }

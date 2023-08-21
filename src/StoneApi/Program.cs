@@ -1,3 +1,4 @@
+using Polly;
 using StoneApi.Clients;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -5,6 +6,22 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services
     .AddSingleton<IStonehengeClient, StonehengeClient>();
+
+builder.Services
+    .AddHttpClient(nameof(StonehengeClient), client =>
+    {
+        string? stonehengeConnectionString = builder.Configuration.GetConnectionString("StonehengeClient");
+        client.BaseAddress = new Uri(stonehengeConnectionString!);
+    })
+    .AddTransientHttpErrorPolicy(builder =>
+        builder.WaitAndRetryAsync(new[]
+            {
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(5),
+                TimeSpan.FromSeconds(10)
+            },
+            onRetry: (result, span) => { Console.WriteLine("Polly Retry."); }
+    ));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
