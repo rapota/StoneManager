@@ -5,11 +5,11 @@ VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoneManager", "StoneManager\StoneManager.csproj", "{C33468D9-BE39-4EFB-9164-E4115B1C1FDD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoneApi", "StoneApi\StoneApi.csproj", "{624D48CD-BC81-4EA3-8508-22043D4310EC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoneApi", "StoneApi\StoneApi.csproj", "{624D48CD-BC81-4EA3-8508-22043D4310EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Stonehenge", "Stonehenge\Stonehenge.csproj", "{E79F7DA3-E69F-407C-B0A3-32610942BE00}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Stonehenge", "Stonehenge\Stonehenge.csproj", "{E79F7DA3-E69F-407C-B0A3-32610942BE00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StoneMessages", "StoneMessages\StoneMessages.csproj", "{5D92FA4A-792F-4976-ACBF-6C4A2FAB8A58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StoneMessages", "StoneMessages\StoneMessages.csproj", "{5D92FA4A-792F-4976-ACBF-6C4A2FAB8A58}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

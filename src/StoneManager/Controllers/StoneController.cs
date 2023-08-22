@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using StoneMessages;
+//using StoneMessages;
 
 namespace StoneManager.Controllers;
 
@@ -14,29 +14,29 @@ public class StoneController : ControllerBase
         _logger = logger;
     }
 
-    [HttpGet]
-    public async Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct)
-    {
-        if (count >= 10)
-        {
-            throw new InvalidOperationException();
-        }
+    //[HttpGet]
+    //public async Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct)
+    //{
+    //    if (count >= 10)
+    //    {
+    //        throw new InvalidOperationException();
+    //    }
 
-        if (count >= 5)
-        {
-            await Task.Delay(
-                TimeSpan.FromSeconds(count.GetValueOrDefault()),
-                ct);
-        }
+    //    if (count >= 5)
+    //    {
+    //        await Task.Delay(
+    //            TimeSpan.FromSeconds(count.GetValueOrDefault()),
+    //            ct);
+    //    }
 
-        List<Stone> stones = Enumerable.Range(1, count ?? 3)
-            .Select(_ => new Stone
-            {
-                Id = Guid.NewGuid(),
-                Weight = Random.Shared.Next(0, 100)
-            })
-            .ToList();
+    //    List<Stone> stones = Enumerable.Range(1, count ?? 3)
+    //        .Select(_ => new Stone
+    //        {
+    //            Id = Guid.NewGuid(),
+    //            Weight = Random.Shared.Next(0, 100)
+    //        })
+    //        .ToList();
 
-        return stones;
-    }
+    //    return stones;
+    //}
 }

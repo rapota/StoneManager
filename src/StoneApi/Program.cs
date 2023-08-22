@@ -1,11 +1,20 @@
 using Polly;
 using StoneApi.Clients;
+using StoneManager.Protos;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services
-    .AddSingleton<IStonehengeClient, StonehengeClient>();
+    .AddScoped<IStoneManagerClient, StoneManagerClient>()
+    .AddScoped<IStonehengeClient, StonehengeClient>();
+
+builder.Services
+    .AddGrpcClient<StoneService.StoneServiceClient>(o =>
+    {
+        string? connectionString = builder.Configuration.GetConnectionString("StoneManagerClient");
+        o.Address = new Uri(connectionString!);
+    });
 
 builder.Services
     .AddHttpClient(nameof(StonehengeClient), client =>
@@ -13,14 +22,12 @@ builder.Services
         string? stonehengeConnectionString = builder.Configuration.GetConnectionString("StonehengeClient");
         client.BaseAddress = new Uri(stonehengeConnectionString!);
     })
-    .AddTransientHttpErrorPolicy(builder =>
-        builder.WaitAndRetryAsync(new[]
-            {
-                TimeSpan.FromSeconds(1),
-                TimeSpan.FromSeconds(5),
-                TimeSpan.FromSeconds(10)
-            },
-            onRetry: (result, span) => { Console.WriteLine("Polly Retry."); }
+    .AddTransientHttpErrorPolicy(x =>
+        x.CircuitBreakerAsync(
+            handledEventsAllowedBeforeBreaking: 2,
+            durationOfBreak: TimeSpan.FromSeconds(10),
+            onBreak: (result, span) => { Console.WriteLine("Polly break for {0}.", span); },
+            onReset: () => { Console.WriteLine("Polly reset."); }
     ));
 
 builder.Services.AddControllers();

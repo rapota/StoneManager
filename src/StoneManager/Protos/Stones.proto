@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+
+option csharp_namespace = "StoneManager.Protos";
+
+message Stone {
+    string id = 1;
+    int32 weight = 2;
+}
+
+message StonesRequest {
+    google.protobuf.Int32Value count = 1;
+}
+
+message StonesResponse {
+    repeated Stone stones = 1;
+}
+
+service StoneService {
+    rpc GetStones (StonesRequest) returns (StonesResponse);
+}
