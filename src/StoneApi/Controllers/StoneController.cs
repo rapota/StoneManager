@@ -20,10 +20,20 @@ public class StoneController : ControllerBase
     }
 
     [HttpGet]
-    public Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct) =>
-        _stoneManagerClient.GetStonesAsync(count, ct);
+    public async Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct)
+    {
+        _logger.LogInformation("Get {0} stones request.", count);
+        List<Stone> stones = await _stoneManagerClient.GetStonesAsync(count, ct);
+        _logger.LogInformation("Received {0} stones.", count);
+        return stones;
+    }
 
     [HttpGet("Legacy")]
-    public Task<List<Stone>> GetLegacy([FromQuery] int? count, CancellationToken ct) =>
-        _stonehengeClient.GetStones(count, ct);
+    public async Task<List<Stone>> GetLegacy([FromQuery] int? count, CancellationToken ct)
+    {
+        _logger.LogInformation("Get {0} legacy stones request.", count);
+        List<Stone> stones = await _stonehengeClient.GetStones(count, ct);
+        _logger.LogInformation("Received {0} legacy stones.", count);
+        return stones;
+    }
 }

@@ -1,18 +1,27 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Polly;
+using Polly.Retry;
 using StoneManager.Protos;
-using System.Threading.Channels;
-using Google.Protobuf.Collections;
-using Grpc.Core;
 
 namespace StoneApi.Clients;
 
 internal sealed class StoneManagerClient : IStoneManagerClient
 {
     private readonly StoneService.StoneServiceClient _client;
+    private readonly AsyncRetryPolicy _retryPolicy;
 
     public StoneManagerClient(StoneService.StoneServiceClient client)
     {
         _client = client;
+
+        _retryPolicy = Policy
+            .Handle<RpcException>()
+            .WaitAndRetryAsync(new[]
+            {
+                TimeSpan.FromSeconds(1),
+                TimeSpan.FromSeconds(3),
+                TimeSpan.FromSeconds(5)
+            });
     }
 
     public async Task<List<StoneMessages.Stone>> GetStonesAsync(int? count, CancellationToken ct = default)
@@ -22,7 +31,7 @@ internal sealed class StoneManagerClient : IStoneManagerClient
             Count = count
         };
 
-        StonesResponse response = await _client.GetStonesAsync(stonesRequest, new CallOptions(cancellationToken: ct));
+        StonesResponse response = await _retryPolicy.ExecuteAsync(async token => await _client.GetStonesAsync(stonesRequest, new CallOptions(cancellationToken: token)), ct);
 
         return response.Stones
             .Select(x => new StoneMessages.Stone

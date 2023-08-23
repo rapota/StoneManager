@@ -3,6 +3,9 @@ using StoneManager.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services
+    .AddSingleton<FailedCounter>();
+
 builder.Services.AddGrpc();
 
 builder.Services.AddControllers();

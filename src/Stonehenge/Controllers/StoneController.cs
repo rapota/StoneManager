@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using StoneMessages;
 
 namespace Stonehenge.Controllers;
@@ -9,37 +8,43 @@ namespace Stonehenge.Controllers;
 public class StoneController : ControllerBase
 {
     private readonly ILogger<StoneController> _logger;
-    private readonly FailedCounter _failedCounter;
+    private readonly ServiceBlocker _serviceBlocker;
 
-    public StoneController(ILogger<StoneController> logger, FailedCounter failedCounter)
+    public StoneController(ILogger<StoneController> logger, ServiceBlocker serviceBlocker)
     {
         _logger = logger;
-        _failedCounter = failedCounter;
+        _serviceBlocker = serviceBlocker;
     }
 
     [HttpGet]
-    public async Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct)
+    public List<Stone> Get([FromQuery] int? count)
     {
-        if (_failedCounter.Counter > 0)
-        {
-            _failedCounter.Counter--;
-            _logger.LogInformation("Failed counter set to {0}", _failedCounter.Counter);
-            throw new InvalidOperationException("Stone error.");
-        }
+        int c = count ?? 3;
 
-        if (count >= 10)
+        // start fail
+        if (c > 10 && _serviceBlocker.BlockedDateTimeOffset == null)
         {
+            _serviceBlocker.BlockedDateTimeOffset = DateTimeOffset.UtcNow.AddSeconds(c - 10);
+            _logger.LogInformation("Service is blocked for {0} seconds", c - 10);
             throw new InvalidOperationException();
         }
 
-        if (count >= 5)
+        if (_serviceBlocker.BlockedDateTimeOffset != null)
         {
-            await Task.Delay(
-                TimeSpan.FromSeconds(count.GetValueOrDefault()),
-                ct);
+            // fail
+            DateTimeOffset dateTimeOffset = (DateTimeOffset)_serviceBlocker.BlockedDateTimeOffset;
+            if (DateTimeOffset.UtcNow < dateTimeOffset)
+            {
+                _logger.LogInformation("Server is blocked for: {0}", dateTimeOffset - DateTimeOffset.UtcNow);
+                throw new InvalidOperationException("Stone error.");
+            }
+
+            // stop fail
+            _serviceBlocker.BlockedDateTimeOffset = null;
+            _logger.LogInformation("Server unblocked.");
         }
 
-        List<Stone> stones = Enumerable.Range(1, count ?? 3)
+        List<Stone> stones = Enumerable.Range(1, c)
             .Select(_ => new Stone
             {
                 Id = Guid.NewGuid(),
@@ -47,13 +52,15 @@ public class StoneController : ControllerBase
             })
             .ToList();
 
+        _logger.LogInformation("Provide response for {0} stones.", stones.Count);
+
         return stones;
     }
 
-    [HttpPost]
-    public void SetErrors([FromQuery] int count)
-    {
-        _failedCounter.Counter = count;
-        _logger.LogInformation("Failed counter set to {0}", count);
-    }
+    //[HttpPost]
+    //public void SetBlock([FromQuery] int count)
+    //{
+    //    _serviceBlocker.BlockedDateTimeOffset = DateTimeOffset.UtcNow.AddSeconds(count);
+    //    _logger.LogInformation("Server blocked till: {0}", _serviceBlocker.BlockedDateTimeOffset);
+    //}
 }

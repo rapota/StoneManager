@@ -1,4 +1,5 @@
 ﻿using StoneMessages;
+using System.Web;
 
 namespace StoneApi.Clients;
 
@@ -17,8 +18,19 @@ internal sealed class StonehengeClient : IStonehengeClient
     {
         HttpClient client = _clientFactory.CreateClient(nameof(StonehengeClient));
 
+        var ub = new UriBuilder
+        {
+            Path = "api/stone"
+        };
+
+        if (count != null)
+        {
+            QueryString queryString = QueryString.Create("count", count.GetValueOrDefault().ToString());
+            ub.Query = queryString.ToString();
+        }
+
         _logger.LogInformation("Requesting {0} stones...", count);
-        List<Stone> stones = await client.GetFromJsonAsync<List<Stone>>("api/stone", ct) ?? new List<Stone>();
+        List<Stone> stones = await client.GetFromJsonAsync<List<Stone>>(ub.Uri.PathAndQuery, ct) ?? new List<Stone>();
 
         _logger.LogInformation("Received {0} stones.", stones.Count);
 

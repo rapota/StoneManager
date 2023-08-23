@@ -1,5 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-//using StoneMessages;
+using StoneManager.Services;
 
 namespace StoneManager.Controllers;
 
@@ -7,36 +7,19 @@ namespace StoneManager.Controllers;
 [Route("api/[controller]")]
 public class StoneController : ControllerBase
 {
+    private readonly FailedCounter _failedCounter;
     private readonly ILogger<StoneController> _logger;
 
-    public StoneController(ILogger<StoneController> logger)
+    public StoneController(FailedCounter failedCounter, ILogger<StoneController> logger)
     {
+        _failedCounter = failedCounter;
         _logger = logger;
     }
 
-    //[HttpGet]
-    //public async Task<List<Stone>> Get([FromQuery] int? count, CancellationToken ct)
+    //[HttpPost]
+    //public void SetErrors([FromQuery] int count)
     //{
-    //    if (count >= 10)
-    //    {
-    //        throw new InvalidOperationException();
-    //    }
-
-    //    if (count >= 5)
-    //    {
-    //        await Task.Delay(
-    //            TimeSpan.FromSeconds(count.GetValueOrDefault()),
-    //            ct);
-    //    }
-
-    //    List<Stone> stones = Enumerable.Range(1, count ?? 3)
-    //        .Select(_ => new Stone
-    //        {
-    //            Id = Guid.NewGuid(),
-    //            Weight = Random.Shared.Next(0, 100)
-    //        })
-    //        .ToList();
-
-    //    return stones;
+    //    _failedCounter.Counter = count;
+    //    _logger.LogInformation("Failed counter set to {0}", count);
     //}
 }
