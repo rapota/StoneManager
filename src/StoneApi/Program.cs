@@ -1,4 +1,5 @@
 using Polly;
+using Refit;
 using StoneApi.Clients;
 using StoneManager.Protos;
 
@@ -29,6 +30,10 @@ builder.Services
             onBreak: (result, span) => { Console.WriteLine("Polly break for {0}.", span); },
             onReset: () => { Console.WriteLine("Polly reset."); }
     ));
+
+builder.Services
+    .AddRefitClient<IStonehengeRefitClient>()
+    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration.GetConnectionString("StonehengeClient")!));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
